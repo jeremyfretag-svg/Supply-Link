@@ -120,6 +120,13 @@ impl SupplyLinkContract {
             .unwrap_or_else(|| Vec::new(&env))
     }
 
+    /// Returns true if a product with the given id is registered, false otherwise.
+    pub fn product_exists(env: Env, id: String) -> bool {
+        env.storage()
+            .persistent()
+            .has(&DataKey::Product(id))
+    }
+
     /// Returns the number of tracking events recorded for `product_id`.
     /// Returns 0 if the product has no events or does not exist.
     pub fn get_events_count(env: Env, product_id: String) -> u32 {
@@ -346,6 +353,68 @@ mod tests {
 
             let count_after = client.get_events_count(&product_id);
             prop_assert_eq!(count_after, count_before + 1);
+        }
+    }
+
+    // ── product_exists unit tests ────────────────────────────────────────────
+
+    /// Req 1.2, 1.3 — unknown product returns false
+    #[test]
+    fn test_product_exists_returns_false_for_unknown() {
+        let env = Env::default();
+        let contract_id = env.register_contract(None, SupplyLinkContract);
+        let client = SupplyLinkContractClient::new(&env, &contract_id);
+        let id = String::from_str(&env, "does-not-exist");
+        assert!(!client.product_exists(&id));
+    }
+
+    /// Req 1.1 — registered product returns true
+    #[test]
+    fn test_product_exists_returns_true_after_register() {
+        let (env, contract_id, product_id) = setup();
+        let client = SupplyLinkContractClient::new(&env, &contract_id);
+        assert!(client.product_exists(&product_id));
+    }
+
+    // ── product_exists property-based tests ──────────────────────────────────
+
+    /// Property: exists iff registered
+    /// Validates: Requirements 1.1, 1.2, 1.3
+    proptest! {
+        #![proptest_config(ProptestConfig::with_cases(100))]
+        #[test]
+        fn prop_exists_iff_registered(product_id_str in "[a-z]{1,20}") {
+            let env = Env::default();
+            env.mock_all_auths();
+            let contract_id = env.register_contract(None, SupplyLinkContract);
+            let client = SupplyLinkContractClient::new(&env, &contract_id);
+            let owner = soroban_sdk::Address::generate(&env);
+            let product_id = String::from_str(&env, &product_id_str);
+
+            prop_assert!(!client.product_exists(&product_id));
+
+            client.register_product(
+                &product_id,
+                &String::from_str(&env, "Widget"),
+                &String::from_str(&env, "Origin"),
+                &owner,
+            );
+
+            prop_assert!(client.product_exists(&product_id));
+        }
+    }
+
+    /// Property: unregistered product always returns false
+    /// Validates: Requirements 1.2, 1.3
+    proptest! {
+        #![proptest_config(ProptestConfig::with_cases(100))]
+        #[test]
+        fn prop_exists_false_before_register(product_id_str in "[a-z]{1,20}") {
+            let env = Env::default();
+            let contract_id = env.register_contract(None, SupplyLinkContract);
+            let client = SupplyLinkContractClient::new(&env, &contract_id);
+            let product_id = String::from_str(&env, &product_id_str);
+            prop_assert!(!client.product_exists(&product_id));
         }
     }
 
