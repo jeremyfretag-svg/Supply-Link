@@ -4,10 +4,46 @@ import {
   signTransaction,
 } from "@stellar/freighter-api";
 
+export class FreighterNotInstalledError extends Error {
+  constructor() {
+    super("Freighter wallet extension is not installed");
+    this.name = "FreighterNotInstalledError";
+  }
+}
+
 export async function getWalletAddress(): Promise<string | null> {
-  const connected = await isConnected();
-  if (!connected) return null;
-  return getPublicKey();
+  try {
+    const connected = await isConnected();
+    if (!connected) return null;
+    return await getPublicKey();
+  } catch (error) {
+    if (
+      error instanceof Error &&
+      (error.message.includes("Freighter") ||
+        error.message.includes("not installed") ||
+        error.message.includes("extension"))
+    ) {
+      throw new FreighterNotInstalledError();
+    }
+    throw error;
+  }
+}
+
+export async function safeSignTransaction(
+  transaction: string
+): Promise<string> {
+  try {
+    return await signTransaction(transaction);
+  } catch (error) {
+    if (
+      error instanceof Error &&
+      (error.message.includes("Freighter") ||
+        error.message.includes("not installed"))
+    ) {
+      throw new FreighterNotInstalledError();
+    }
+    throw error;
+  }
 }
 
 export { signTransaction };
