@@ -11,6 +11,7 @@ import { RegisterProductForm } from "@/components/products/RegisterProductForm";
 import { BatchImportForm } from "@/components/products/BatchImportForm";
 import ProductQRCode from "@/components/products/ProductQRCode";
 import type { EventType } from "@/lib/types";
+import { EVENT_TYPE_CONFIG } from "@/lib/eventTypeConfig";
 
 const EVENT_TYPES: EventType[] = ["HARVEST", "PROCESSING", "SHIPPING", "RETAIL"];
 
@@ -163,11 +164,20 @@ export default function ProductsPage() {
                 <Select.Item value="ALL" className="px-3 py-2 text-sm rounded-lg cursor-pointer hover:bg-[var(--muted-bg)] focus:bg-[var(--muted-bg)] outline-none">
                   <Select.ItemText>All Events</Select.ItemText>
                 </Select.Item>
-                {EVENT_TYPES.map((t) => (
-                  <Select.Item key={t} value={t} className="px-3 py-2 text-sm rounded-lg cursor-pointer hover:bg-[var(--muted-bg)] focus:bg-[var(--muted-bg)] outline-none">
-                    <Select.ItemText>{t}</Select.ItemText>
-                  </Select.Item>
-                ))}
+                {EVENT_TYPES.map((t) => {
+                  const cfg = EVENT_TYPE_CONFIG[t];
+                  const Icon = cfg.icon;
+                  return (
+                    <Select.Item key={t} value={t} className="px-3 py-2 text-sm rounded-lg cursor-pointer hover:bg-[var(--muted-bg)] focus:bg-[var(--muted-bg)] outline-none">
+                      <Select.ItemText>
+                        <span className={`inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-xs font-medium ${cfg.badgeClass}`}>
+                          <Icon size={11} />
+                          {cfg.label}
+                        </span>
+                      </Select.ItemText>
+                    </Select.Item>
+                  );
+                })}
               </Select.Viewport>
             </Select.Content>
           </Select.Portal>
