@@ -7,6 +7,7 @@ import { ThemeToggle } from "@/components/ThemeToggle";
 import { WalletConnect } from "@/components/wallet/WalletConnect";
 import { NetworkMismatchBanner } from "@/components/wallet/NetworkMismatchBanner";
 import { LowBalanceWarning } from "@/components/wallet/LowBalanceWarning";
+import { NetworkBadge } from "@/components/NetworkBadge";
 import { useStore } from "@/lib/state/store";
 
 const PAGE_TITLES: Record<string, string> = {
@@ -55,6 +56,7 @@ export function AppNavbar({ onMenuClick }: AppNavbarProps) {
         <span className="text-sm font-medium text-[var(--foreground)] md:ml-2">{title}</span>
 
         <div className="ml-auto flex items-center gap-3">
+          <NetworkBadge />
           <WalletConnect />
           <ThemeToggle />
         </div>

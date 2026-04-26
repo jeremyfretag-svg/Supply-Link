@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { ExternalLink, LogOut } from "lucide-react";
 import { getWalletAddress, FreighterNotInstalledError } from "@/lib/stellar/client";
 import { getWalletNetwork, isNetworkMatching } from "@/lib/stellar/network";
@@ -10,10 +10,14 @@ import { useStore } from "@/lib/state/store";
 import { FreighterNotInstalledModal } from "./FreighterNotInstalledModal";
 
 export function WalletConnect() {
-  const { walletAddress, setWalletAddress, xlmBalance, setXlmBalance, setNetworkMismatch, disconnect } =
+  const { walletAddress, setWalletAddress, xlmBalance, setXlmBalance, setNetworkMismatch, validateWalletConnection, disconnect } =
     useStore();
   const [loading, setLoading] = useState(false);
   const [showFreighterModal, setShowFreighterModal] = useState(false);
+
+  useEffect(() => {
+    validateWalletConnection();
+  }, [validateWalletConnection]);
 
   async function connect() {
     setLoading(true);

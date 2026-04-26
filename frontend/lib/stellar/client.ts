@@ -4,6 +4,40 @@ import {
   signTransaction,
 } from "@stellar/freighter-api";
 
+export type StellarNetwork = "testnet" | "mainnet";
+
+interface NetworkConfig {
+  passphrase: string;
+  rpcUrl: string;
+  name: string;
+}
+
+const NETWORKS: Record<StellarNetwork, NetworkConfig> = {
+  testnet: {
+    passphrase: "Test SDF Network ; September 2015",
+    rpcUrl: "https://soroban-testnet.stellar.org",
+    name: "Testnet",
+  },
+  mainnet: {
+    passphrase: "Public Global Stellar Network ; September 2015",
+    rpcUrl: "https://soroban-mainnet.stellar.org",
+    name: "Mainnet",
+  },
+};
+
+const CURRENT_NETWORK: StellarNetwork =
+  (process.env.NEXT_PUBLIC_STELLAR_NETWORK as StellarNetwork) || "testnet";
+
+const NETWORK_CONFIG = NETWORKS[CURRENT_NETWORK];
+
+export function getNetwork(): StellarNetwork {
+  return CURRENT_NETWORK;
+}
+
+export function getNetworkName(): string {
+  return NETWORK_CONFIG.name;
+}
+
 export class FreighterNotInstalledError extends Error {
   constructor() {
     super("Freighter wallet extension is not installed");
@@ -54,12 +88,9 @@ export const CONTRACT_ID =
   process.env.NEXT_PUBLIC_CONTRACT_ID ??
   "CBUWSKT2UGOAXK4ZREVDJV5XHSYB42PZ3CERU2ZFUTUMAZLJEHNZIECA";
 
-export const NETWORK_PASSPHRASE =
-  process.env.NEXT_PUBLIC_NETWORK_PASSPHRASE ??
-  "Test SDF Network ; September 2015";
+export const NETWORK_PASSPHRASE = NETWORK_CONFIG.passphrase;
 
-export const RPC_URL =
-  process.env.NEXT_PUBLIC_RPC_URL ?? "https://soroban-testnet.stellar.org";
+export const RPC_URL = NETWORK_CONFIG.rpcUrl;
 
 /**
  * Stub: call register_product on the Soroban contract.
