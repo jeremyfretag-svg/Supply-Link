@@ -226,6 +226,36 @@ Stellar's speed and near-zero cost make it ideal for supply chain use cases wher
 
 ---
 
+
+---
+
+## Architecture Decision Records
+
+Key architectural decisions are documented in [docs/adr/](docs/adr/):
+
+| ADR | Decision |
+|---|---|
+| [ADR-001](docs/adr/ADR-001-stellar-soroban-over-ethereum.md) | Why Stellar/Soroban over Ethereum |
+| [ADR-002](docs/adr/ADR-002-nextjs-app-router.md) | Why Next.js App Router over Pages Router |
+| [ADR-003](docs/adr/ADR-003-zustand-over-redux.md) | Why Zustand over Redux/Context |
+| [ADR-004](docs/adr/ADR-004-freighter-wallet.md) | Why Freighter as the wallet provider |
+
+---
+
+## UI Component Library
+
+Stories for all UI components are written with [Storybook](https://storybook.js.org).
+
+```bash
+cd frontend
+npm install
+npm run storybook
+# -> http://localhost:6006
+```
+
+Components covered: `Button` (all variants), `Card`, `Badge` (all event types), `WalletConnect` (connected/disconnected/loading), `ProductCard`, `EventTimeline`.
+
+Visual regression tests run automatically on every PR via [Chromatic](https://www.chromatic.com). Set `CHROMATIC_PROJECT_TOKEN` in your repository secrets to enable it.
 ## Contributing
 
 Contributions are welcome across all skill levels â€” smart contracts, frontend, docs, design, and testing.
