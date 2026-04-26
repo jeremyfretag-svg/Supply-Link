@@ -1,9 +1,10 @@
 "use client";
 
-import { useState, useEffect, type ChangeEvent } from "react";
-import { Plus, List, BarChart2 } from "lucide-react";
-import { MOCK_PRODUCTS, getEventsByProductId } from "@/lib/mock/products";
+import { useState, type ChangeEvent } from "react";
+import { Plus, List, BarChart2, RefreshCw } from "lucide-react";
+import { MOCK_PRODUCTS } from "@/lib/mock/products";
 import type { TrackingEvent } from "@/lib/types";
+import { useEvents } from "@/lib/hooks/useEvents";
 import { EventTimeline } from "@/components/tracking/EventTimeline";
 import { EventTimelineSkeleton } from "@/components/tracking/EventTimelineSkeleton";
 import { AddEventModal } from "@/components/tracking/AddEventModal";
@@ -11,24 +12,22 @@ import { TimelineChart } from "@/components/tracking/TimelineChart";
 
 export default function TrackingPage() {
   const [selectedId, setSelectedId] = useState(MOCK_PRODUCTS[0]?.id ?? "");
-  const [events, setEvents] = useState<TrackingEvent[]>([]);
-  const [loading, setLoading] = useState(false);
   const [showModal, setShowModal] = useState(false);
   const [view, setView] = useState<"list" | "chart">("list");
 
-  useEffect(() => {
-    if (!selectedId) return;
-    setLoading(true);
-    // Simulate async fetch — replace with real contract call
-    const timer = setTimeout(() => {
-      setEvents(getEventsByProductId(selectedId));
-      setLoading(false);
-    }, 600);
-    return () => clearTimeout(timer);
-  }, [selectedId]);
+  const { events: allEvents, loading, error, refresh, addEventOptimistic } = useEvents();
+
+  const events = allEvents.filter((e) => e.productId === selectedId);
 
   function handleAddEvent(event: TrackingEvent) {
-    setEvents((prev: TrackingEvent[]) => [...prev, event]);
+    addEventOptimistic(
+      event,
+      async () => {
+        // Replace with real Soroban contract call
+        await new Promise((r) => setTimeout(r, 1000));
+      },
+      (msg) => console.error("Add event failed:", msg)
+    );
   }
 
   const selectedProduct = MOCK_PRODUCTS.find((p) => p.id === selectedId);
@@ -37,15 +36,32 @@ export default function TrackingPage() {
     <div className="p-6 max-w-2xl mx-auto">
       <div className="flex items-center justify-between mb-6">
         <h1 className="text-2xl font-bold text-[var(--foreground)]">Tracking</h1>
-        <button
-          onClick={() => setShowModal(true)}
-          disabled={!selectedId}
-          className="flex items-center gap-2 px-4 py-2 text-sm rounded-md bg-[var(--primary)] text-[var(--primary-fg)] hover:opacity-90 disabled:opacity-40 transition-opacity"
-        >
-          <Plus size={15} />
-          Add Event
-        </button>
+        <div className="flex gap-2">
+          {/* Refresh button (#48) */}
+          <button
+            onClick={refresh}
+            title="Refresh events"
+            className="flex items-center gap-2 px-3 py-2 border border-[var(--card-border)] bg-[var(--card)] hover:bg-[var(--muted-bg)] rounded-lg text-sm transition-colors"
+          >
+            <RefreshCw size={15} />
+          </button>
+          <button
+            onClick={() => setShowModal(true)}
+            disabled={!selectedId}
+            className="flex items-center gap-2 px-4 py-2 text-sm rounded-md bg-[var(--primary)] text-[var(--primary-fg)] hover:opacity-90 disabled:opacity-40 transition-opacity"
+          >
+            <Plus size={15} />
+            Add Event
+          </button>
+        </div>
       </div>
+
+      {/* Error banner (#47) */}
+      {error && (
+        <div className="mb-4 px-4 py-3 rounded-lg bg-red-500/10 border border-red-500/20 text-red-500 text-sm">
+          {error}
+        </div>
+      )}
 
       {/* Product selector */}
       <div className="mb-6">
