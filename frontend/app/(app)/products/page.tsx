@@ -2,12 +2,13 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { Search, Plus, Package, ChevronDown } from "lucide-react";
+import { Search, Plus, Package, ChevronDown, Upload } from "lucide-react";
 import * as Select from "@radix-ui/react-select";
 import { useStore } from "@/lib/state/store";
 import { listProducts } from "@/lib/stellar/client";
 import { MOCK_PRODUCTS } from "@/lib/mock/products";
 import { RegisterProductForm } from "@/components/products/RegisterProductForm";
+import { BatchImportForm } from "@/components/products/BatchImportForm";
 import ProductQRCode from "@/components/products/ProductQRCode";
 import type { EventType } from "@/lib/types";
 
@@ -56,6 +57,7 @@ export default function ProductsPage() {
   const [search, setSearch] = useState("");
   const [eventFilter, setEventFilter] = useState<EventType | "ALL">("ALL");
   const [modalOpen, setModalOpen] = useState(false);
+  const [batchModalOpen, setBatchModalOpen] = useState(false);
 
   useEffect(() => {
     async function load() {
@@ -88,12 +90,20 @@ export default function ProductsPage() {
             {loading ? "Loading…" : `${filtered.length} product${filtered.length !== 1 ? "s" : ""}`}
           </p>
         </div>
-        <button
-          onClick={() => setModalOpen(true)}
-          className="flex items-center gap-2 px-4 py-2 bg-violet-600 hover:bg-violet-700 text-white rounded-lg text-sm font-medium transition-colors self-start sm:self-auto"
-        >
-          <Plus size={16} /> Register New Product
-        </button>
+        <div className="flex gap-2 self-start sm:self-auto">
+          <button
+            onClick={() => setBatchModalOpen(true)}
+            className="flex items-center gap-2 px-4 py-2 border border-[var(--card-border)] bg-[var(--card)] hover:bg-[var(--muted-bg)] rounded-lg text-sm font-medium transition-colors"
+          >
+            <Upload size={16} /> Import CSV
+          </button>
+          <button
+            onClick={() => setModalOpen(true)}
+            className="flex items-center gap-2 px-4 py-2 bg-violet-600 hover:bg-violet-700 text-white rounded-lg text-sm font-medium transition-colors"
+          >
+            <Plus size={16} /> Register New Product
+          </button>
+        </div>
       </div>
 
       <div className="flex flex-col sm:flex-row gap-3 mb-8">
@@ -161,6 +171,7 @@ export default function ProductsPage() {
       )}
 
       <RegisterProductForm open={modalOpen} onOpenChange={setModalOpen} />
+      <BatchImportForm open={batchModalOpen} onOpenChange={setBatchModalOpen} />
     </main>
   );
 }
