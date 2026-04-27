@@ -5,6 +5,7 @@ import { EventTimeline } from "@/components/products/EventTimeline";
 import ProductQRCode from "@/components/products/ProductQRCode";
 import { ScanQRButton } from "@/components/tracking/ScanQRButton";
 import { ShareButton } from "@/components/ui/ShareButton";
+import { ProvenanceScoreGauge } from "@/components/products/ProvenanceScoreGauge";
 
 interface Props {
   params: { id: string };
@@ -103,7 +104,10 @@ export default async function VerifyPage({ params }: Props) {
 
       {/* Event Timeline */}
       <section className="border border-[var(--card-border)] bg-[var(--card)] rounded-xl p-6">
-        <h2 className="text-base font-semibold text-[var(--foreground)] mb-5">Product Journey</h2>
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-5">
+          <h2 className="text-base font-semibold text-[var(--foreground)]">Product Journey</h2>
+          <ProvenanceScoreGauge events={events} />
+        </div>
         <EventTimeline events={events} />
       </section>
 
